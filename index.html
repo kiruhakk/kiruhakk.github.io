@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vesta Instalaciones - Frigorística y Climatización</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <img src="logo.png" alt="Vesta Instalaciones Logo" class="logo">
+            
+            <nav>
+                <ul id="nav-links">
+                    <li data-key="nav-home">Inicio</li>
+                    <li data-key="nav-services">Servicios</li>
+                    <li data-key="nav-contact">Contacto</li>
+                </ul>
+            </nav>
+
+            <div class="lang-selector">
+                <button onclick="changeLanguage('es')">ES</button>
+                <button onclick="changeLanguage('en')">EN</button>
+                <button onclick="changeLanguage('ru')">RU</button>
+                <button onclick="changeLanguage('ua')">UA</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1 data-key="hero-title">Vesta Instalaciones</h1>
+        <p data-key="hero-subtitle">Expertos en refrigeración, aire acondicionado y ventilación industrial.</p>
+    </section>
+
+    <section class="services">
+        <h2 data-key="services-title">Nuestros Servicios</h2>
+        <div class="service-grid">
+            <div class="service-item">
+                <h3 data-key="service-1-title">Instalación</h3>
+                <p data-key="service-1-text">Sistemas industriales de alta eficiencia.</p>
+            </div>
+            <div class="service-item">
+                <h3 data-key="service-2-title">Reparación</h3>
+                <p data-key="service-2-text">Servicio técnico rápido y garantizado.</p>
+            </div>
+            <div class="service-item">
+                <h3 data-key="service-3-title">Mantenimiento</h3>
+                <p data-key="service-3-text">Planes preventivos para empresas.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Vesta Instalaciones.</p>
+        <small>Su IP pública ha sido enviada a la administración de seguridad de Vesta.</small>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
